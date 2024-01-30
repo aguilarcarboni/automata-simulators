@@ -1,35 +1,51 @@
-# prompt: create a finite state automata
+import json
+import transition
 
-import re
+class FiniteAutomaton:
+    def __init__(self):
+        self.states = []
+        self.alphabet = []
+        self.transitions = []
+        self.start_state = None
+        self.accept_states = []
 
-# Define the states of the automaton
-states = ['q0', 'q1', 'q2']
+    def load_from_json(self, json_data):
+        
+        # Parse JSON data and initialize the Automaton object
+        data = json.loads(json_data)
+        self.states = data["states"]
+        self.alphabet = data["alphabet"]
+        self.start_state = data["start_state"]
+        self.accept_states = data["accept_states"]
 
-# Define the alphabet of the automaton
-alphabet = ['0', '1']
+        # Load transitions from delta function declaration
+        self.transitions = [transition.Transition(t["state"], t["input"], t["next_state"]) for t in data["delta"]]
 
-# Define the transition function
-transitions = {
-  'q0': {'0': 'q1', '1': 'q2'},
-  'q1': {'0': 'q0', '1': 'q1'},
-  'q2': {'0': 'q2', '1': 'q0'}
-}
+    def is_accepted(self, input_string):
+        # Check if the input string is accepted by the FA
+        current_state = self.start_state
 
-# Define the start state
-startState = 'q0'
+        for symbol in input_string:
+            next_state = self.get_next_state(current_state, symbol)
+            if next_state is None:
+                return False
+            current_state = next_state
 
-# Define the accepting states
-finalStates = ['q2']
+        return current_state in self.accept_states
 
-# Create the automaton
-automaton = (states, alphabet, transitions, startState, finalStates)
+    def get_next_state(self, current_state, input_symbol):
+        # Get the next state based on the current state and input symbol
+        for transition in self.transitions:
+            if transition.state == current_state and transition.input_symbol == input_symbol:
+                return transition.next_state
+        return None
 
-# Test the automaton
-string = '01010'
-currentState = startState
-for char in string:
-  currentState = transitions[currentState][char]
-if currentState in finalStates:
-  print('The string is accepted by the automaton.')
-else:
-  print('The string is not accepted by the automaton.')
+    def print_fa(self):
+        # Print the FA details
+        print("States:", self.states)
+        print("Alphabet:", self.alphabet)
+        print("Transitions:")
+        for transition in self.transitions:
+            print(f"  {transition.state} --({transition.input_symbol})--> {transition.next_state}")
+        print("Start State:", self.start_state)
+        print("Accept States:", self.accept_states)
