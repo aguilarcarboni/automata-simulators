@@ -1,5 +1,5 @@
-import tests.regex_testing as regex_testing
-import src.automaton as automata
+import regex_processing as regex_processing
+import automaton as automata
 
 # CLI Interface
 def main():
@@ -23,7 +23,7 @@ def main():
             else:
                 print("Error: Automaton not loaded.")
         elif command[0] == "regex" and len(command) == 3 and command[1] == "--input":
-            automaton = regex_testing.RegexAutomaton()
+            automaton = regex_processing.RegexAutomaton()
             automaton.build_from_regex(command[2])
             print("Automaton built from regex.")
         elif command[0] == "print" and len(command) == 1:
