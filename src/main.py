@@ -37,7 +37,7 @@ def main():
 
         elif command[0] == "print":
             if automaton_in_memory:
-                pass
+                automaton_in_memory.print_fa()
             else:
                 print("No automaton loaded")
 

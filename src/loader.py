@@ -6,11 +6,11 @@ from automaton import DFA, NFA
 def load_from_json(json_data):
     
     alphabet = json_data.get("alphabet", [])
-    has_epsilon = "ε" in alphabet
+    has_epsilon = "<EPSILON>" in alphabet
     automaton_type = "NFA" if has_epsilon else "DFA"
     print(f"Loading {automaton_type} from JSON...")
     
-    automaton = NFA() if 'ε' in json_data['alphabet'] else DFA()
+    automaton = NFA() if '<EPSILON>' in json_data['alphabet'] else DFA()
 
     for state in json_data['states']:
         automaton.add_state(state)
