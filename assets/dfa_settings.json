@@ -1,15 +1,14 @@
 {
     "states": ["q0", "q1", "q2"],
-    "alphabet": ["0", "1", "<EPSILON>"],
+    "alphabet": ["a", "b", "ε"],
     "delta": [
-    { "state": "q0", "input": "0", "next_state": "q1" },
-    { "state": "q0", "input": "1", "next_state": "q0" },
+    { "state": "q0", "input": "ε", "next_state": "q1" },
+    { "state": "q0", "input": "a", "next_state": "q2" },
     { "state": "q0", "input": "ε", "next_state": "q2" },
-    { "state": "q1", "input": "0", "next_state": "q2" },
-    { "state": "q1", "input": "1", "next_state": "q0" },
-    { "state": "q2", "input": "0", "next_state": "q2" },
-    { "state": "q2", "input": "1", "next_state": "q2" }
+    { "state": "q2", "input": "a", "next_state": "q2" },
+    { "state": "q2", "input": "b", "next_state": "q3" },
+    { "state": "q1", "input": "ε", "next_state": "q3" }
     ],
     "start_state": "q0",
-    "accept_states": ["q2"]
+    "accept_states": ["q3"]
 }
