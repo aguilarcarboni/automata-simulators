@@ -4,21 +4,25 @@ import re
 from automaton import DFA, NFA
 
 def load_from_json(json_data):
-    
     alphabet = json_data.get("alphabet", [])
     has_epsilon = "<EPSILON>" in alphabet
     automaton_type = "NFA" if has_epsilon else "DFA"
     print(f"Loading {automaton_type} from JSON...")
-    
-    automaton = NFA() if '<EPSILON>' in json_data['alphabet'] else DFA()
+
+    automaton = NFA() if has_epsilon else DFA()
 
     for state in json_data['states']:
         automaton.add_state(state)
 
     for transition in json_data['delta']:
-        automaton.add_transition(
-            transition['state'], transition['input'], transition['next_state']
-        )
+        if transition['input'] == "<EPSILON>":
+            automaton.add_epsilon_transition(
+                transition['state'], transition['next_state']
+            )
+        else:
+            automaton.add_transition(
+                transition['state'], transition['input'], transition['next_state']
+            )
 
     automaton.set_start_state(json_data['start_state'])
     automaton.set_accept_states(json_data['accept_states'])

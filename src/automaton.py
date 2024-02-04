@@ -51,31 +51,63 @@ class DFA(Automaton):
         else:
             return "REJECT", "String rejected"
 
+class NFATransition:
+    def __init__(self, state, input_symbol, next_state):
+        self.state = state
+        self.input_symbol = input_symbol
+        self.next_state = next_state
+
+
 class NFA(Automaton):
-    def process_string(self, input_string, verbose=False):
-        current_states = {self.start_state}
-        path = []
+    def __init__(self):
+        super().__init__()
 
-        for symbol in input_string:
-            if symbol not in self.alphabet:
-                return "REJECT", f"Invalid symbol '{symbol}'"
-
-            next_states = set()
-            for state in current_states:
-                next_state = self.states[state].transitions.get(symbol)
-                if next_state:
-                    next_states.add(next_state)
-
-            if not next_states:
-                return "REJECT", f"No transition for '{symbol}' in states {current_states}"
-
-            path.append((current_states, symbol, next_states))
-            current_states = next_states
-
-        if any(state in self.accept_states for state in current_states):
-            if verbose:
-                return "ACCEPT", "String accepted", path
-            else:
-                return "ACCEPT", "String accepted"
+    def add_transition(self, current_state, input_symbol, next_state):
+        transition = NFATransition(current_state, input_symbol, next_state)
+        if current_state not in self.states:
+            self.states[current_state] = State(current_state)
+        if input_symbol == "<EPSILON>":
+            if "epsilon_transitions" not in self.states[current_state].transitions:
+                self.states[current_state].transitions["epsilon_transitions"] = []
+            self.states[current_state].transitions["epsilon_transitions"].append(next_state)
         else:
-            return "REJECT", "String rejected"
+            if "transitions" not in self.states[current_state].transitions:
+                self.states[current_state].transitions["transitions"] = []
+            self.states[current_state].transitions["transitions"].append(transition)
+
+    def process_string(self, input_string, current_state, verbose=False, path=None):
+        if path is None:
+            path = []
+
+        if not input_string:
+            if current_state in self.accept_states:
+                if verbose:
+                    return "ACCEPT", "String accepted", path
+                else:
+                    return "ACCEPT", "String accepted"
+            else:
+                return "REJECT", "String rejected"
+
+        symbol = input_string[0]
+        remaining_input = input_string[1:]
+
+        if current_state not in self.states:
+            return "REJECT", f"Invalid state '{current_state}'"
+
+        transitions = self.states[current_state].transitions.get("transitions", [])
+        epsilon_transitions = self.states[current_state].transitions.get("epsilon_transitions", [])
+
+        for transition in transitions:
+            if transition.input_symbol == symbol:
+                new_path = path + [(current_state, symbol, transition.next_state)]
+                result, message = self.process_string(remaining_input, transition.next_state, verbose, new_path)
+                if result == "ACCEPT":
+                    return result, message
+
+        for next_state in epsilon_transitions:
+            new_path = path + [(current_state, "<EPSILON>", next_state)]
+            result, message = self.process_string(input_string, next_state, verbose, new_path)
+            if result == "ACCEPT":
+                return result, message
+
+        return "REJECT", f"No transition for '{symbol}' in state '{current_state}'"

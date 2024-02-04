@@ -21,13 +21,14 @@ def main():
         elif command[0] == "process":
             if automaton_in_memory:
                 input_string = command[1]
+                start_state = automaton_in_memory.start_state  # Obtener el estado inicial del NFA
                 if "--verbose" in command:
-                    result, message, path = automaton_in_memory.process_string(input_string, verbose=True)
+                    result, message, path = automaton_in_memory.process_string(input_string, start_state, verbose=True)
                     print(f"{result} {message}")
                     for step in path:
                         print(f"{step[0]} --({step[1]})--> {step[2]}")
                 else:
-                    result, message = automaton_in_memory.process_string(input_string)
+                    result, message = automaton_in_memory.process_string(input_string, start_state)
                     print(f"{result} {message}")
             else:
                 print("No automaton loaded")
