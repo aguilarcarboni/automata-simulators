@@ -1,40 +1,52 @@
-import regex_processing as regex_processing
-import automaton as automata
+import json
+from loader import load_from_json, load_from_regex
+from automaton import DFA, NFA
 
-# CLI Interface
 def main():
-    automaton = None
+    automaton_in_memory = None
 
     while True:
-        command = input(">> ").split()
-        if command[0] == "load" and len(command) == 3 and command[1] == "--input":
-            with open(command[2], "r") as file:
-                json_data = file.read()
-                automaton = automata.FiniteAutomaton()
-                automaton.load_from_json(json_data)
-                print("Automaton loaded successfully.")
-        elif command[0] == "process" and len(command) == 3 and command[1] == "--input":
-            if automaton:
-                result = automaton.is_accepted(command[2])
-                if result:
-                    print("ACCEPT")
+        command = input(">> ").strip().split()
+
+        if command[0] == "load":
+            if command[1] == "--input=file":
+                with open(command[2]) as file:
+                    data = json.load(file)
+                    automaton_in_memory = load_from_json(data)
+            elif command[1] == "--input=regex":
+                automaton_in_memory = load_from_regex(command[2])
+            else:
+                print("Invalid load command")
+
+        elif command[0] == "process":
+            if automaton_in_memory:
+                input_string = command[1]
+                start_state = automaton_in_memory.start_state  # Obtener el estado inicial del NFA
+                if "--verbose" in command:
+                    result, message, path = automaton_in_memory.process_string(input_string, start_state, verbose=True)
+                    print(f"{result} {message}")
+                    for step in path:
+                        print(f"{step[0]} --({step[1]})--> {step[2]}")
                 else:
-                    print("REJECT")
+                    result, message = automaton_in_memory.process_string(input_string, start_state)
+                    print(f"{result} {message}")
             else:
-                print("Error: Automaton not loaded.")
-        elif command[0] == "regex" and len(command) == 3 and command[1] == "--input":
-            automaton = regex_processing.RegexAutomaton()
-            automaton.build_from_regex(command[2])
-            print("Automaton built from regex.")
-        elif command[0] == "print" and len(command) == 1:
-            if automaton:
-                automaton.print_fa()
+                print("No automaton loaded")
+
+        elif command[0] == "regex":
+            automaton_in_memory = load_from_regex(command[2])
+
+        elif command[0] == "print":
+            if automaton_in_memory:
+                automaton_in_memory.print_fa()
             else:
-                print("Error: Automaton not loaded.")
-        elif command[0] == "exit" and len(command) == 1:
+                print("No automaton loaded")
+
+        elif command[0] == "exit":
             break
+
         else:
-            print("Invalid command. Please try again.")
+            print("Invalid command")
 
 if __name__ == "__main__":
     main()
