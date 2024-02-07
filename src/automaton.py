@@ -3,7 +3,6 @@ class State:
         self.name = name
         self.transitions = {}
 
-
 class Automaton:
     def __init__(self):
         self.states = {}
@@ -25,13 +24,14 @@ class Automaton:
     def set_accept_states(self, accept_states):
         self.accept_states = set(accept_states)
 
-
 class DFA(Automaton):
     def process_string(self, input_string, verbose=False):
         current_state = self.start_state
 
-        path = []  # Track the path for verbose mode
+        # Track the path for verbose mode
+        path = []
 
+        # Check symbol by symbol ensuring each is in the alphabet and has a next state
         for symbol in input_string:
             if symbol not in self.alphabet:
                 return "REJECT", f"Invalid symbol '{symbol}'"
@@ -43,6 +43,7 @@ class DFA(Automaton):
             path.append((current_state, symbol, next_state))
             current_state = next_state
 
+        # Check if current state is final state and finish process
         if current_state in self.accept_states:
             if verbose:
                 return "ACCEPT", "String accepted", path
@@ -51,21 +52,16 @@ class DFA(Automaton):
         else:
             return "REJECT", "String rejected"
 
-class NFATransition:
-    def __init__(self, state, input_symbol, next_state):
-        self.state = state
-        self.input_symbol = input_symbol
-        self.next_state = next_state
-
 
 class NFA(Automaton):
     def __init__(self):
         super().__init__()
 
-    def add_transition(self, current_state, input_symbol, next_state):
+    def add_transition(self, current_state, input_symbol, next_state): # No se puede tirar al parent? add_transition
         transition = NFATransition(current_state, input_symbol, next_state)
         if current_state not in self.states:
             self.states[current_state] = State(current_state)
+
         if input_symbol == "<EPSILON>":
             if "epsilon_transitions" not in self.states[current_state].transitions:
                 self.states[current_state].transitions["epsilon_transitions"] = []
@@ -76,6 +72,7 @@ class NFA(Automaton):
             self.states[current_state].transitions["transitions"].append(transition)
 
     def process_string(self, input_string, current_state, verbose=False, path=None):
+        # Track the path for verbose mode
         if path is None:
             path = []
 
@@ -111,3 +108,9 @@ class NFA(Automaton):
                 return result, message
 
         return "REJECT", f"No transition for '{symbol}' in state '{current_state}'"
+
+class NFATransition: # Por que?? Deberia de ser el metodo add_transition
+    def __init__(self, state, input_symbol, next_state):
+        self.state = state
+        self.input_symbol = input_symbol
+        self.next_state = next_state

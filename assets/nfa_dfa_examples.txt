@@ -1,3 +1,5 @@
+Copy paste this into dfa_settings.json
+
 {
     "states": ["q0", "q1", "q2", "q3"], "alphabet": ["0", "1"], "delta": [
     { "state": "q0", "input": "0", "next_state": "q1" }, 
