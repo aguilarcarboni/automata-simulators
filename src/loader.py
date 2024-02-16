@@ -29,12 +29,20 @@ def load_from_json(json_data):
 
 def load_from_regex(regex):
     regex_symbols = ['*', '+', '?', '^', '$', '(',')']
+
     alphabet = set()
-    prev = ''
+    previousSymbol = str()
+
+    states = ['q0', 'q1', 'q2', 'q3', 'q4']
+    current_state = 0
 
     # DFA
     automaton = DFA()
-    automaton.add_state("q0")
+    for state in states:
+        automaton.add_state(state)
+
+    automaton.set_start_state(states[0])
+
     for index, symbol in enumerate(regex):
         if symbol not in regex_symbols:
 
@@ -42,25 +50,32 @@ def load_from_regex(regex):
                 print("Unrecognized symbol in regular expression.")
                 return
             
-            # Add current symbol to alphabet
-            alphabet.add(symbol)
-
-            automaton.set_start_state("q0")
-
-            prev = symbol
-            print(symbol)
+            if symbol not in alphabet:
+                alphabet.add(symbol)
+                automaton.add_transition(states[current_state], symbol, states[current_state + 1])
+                current_state += 1
+            
+            # Keep track of symbol
+            previousSymbol = symbol
 
         else:
-            print(symbol)
+            #6686989*75546858
             match (symbol):
                 case '*':
-                    print(prev)
-                    automaton.add_transition("q0", prev, "q0")
-                    continue
+                    automaton.add_transition(states[current_state], previousSymbol, states[current_state])
                 case '+':
-                    continue
+                    print(current_state)
+                    # Add transition from current state to next state to ensure it is typed at least once
+                    automaton.add_transition(states[current_state], previousSymbol, states[current_state + 1])
+
+                    # Go to next state
+                    current_state+=1
+
+                    # Add transition to same state to ensure it can be written 1+ times
+                    automaton.add_transition(states[current_state], previousSymbol, states[current_state])
                 case '?':
-                    continue
+                    # Add transition to same state to ensure it can be read
+                    automaton.add_transition(states[current_state], previousSymbol, states[current_state])
                 case '^':
                     continue
                 case '$':
@@ -68,8 +83,9 @@ def load_from_regex(regex):
                 case '(':
                     continue
                 case _:
-                    print("Symbol not in regex dictionary")
+                    print("Symbol", symbol, "not in regex dictionary")
                     return
-        automaton.set_accept_states("q0")
-
+                
+    automaton.set_accept_states([states[current_state]])
+    automaton.alphabet = alphabet
     return automaton

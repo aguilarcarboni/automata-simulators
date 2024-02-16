@@ -25,7 +25,7 @@ class Automaton:
         self.accept_states = set(accept_states)
 
 class DFA(Automaton):
-    def process_string(self, input_string, verbose=False):
+    def process_string(self, input_string, verbose = False):
         current_state = self.start_state
 
         # Track the path for verbose mode
@@ -45,8 +45,12 @@ class DFA(Automaton):
 
         # Check if current state is final state and finish process
         if current_state in self.accept_states:
+
+            ###
+            # Verbose no sirve
+            ###
             if verbose:
-                return "ACCEPT", "String accepted", path
+                return "ACCEPT", "String accepted"
             else:
                 return "ACCEPT", "String accepted"
         else:
@@ -57,7 +61,7 @@ class NFA(Automaton):
     def __init__(self):
         super().__init__()
 
-    def add_transition(self, current_state, input_symbol, next_state): # No se puede tirar al parent? add_transition
+    def add_transition(self, current_state, input_symbol, next_state):
         transition = NFATransition(current_state, input_symbol, next_state)
         if current_state not in self.states:
             self.states[current_state] = State(current_state)
@@ -109,7 +113,7 @@ class NFA(Automaton):
 
         return "REJECT", f"No transition for '{symbol}' in state '{current_state}'"
 
-class NFATransition: # Por que?? Deberia de ser el metodo add_transition
+class NFATransition:
     def __init__(self, state, input_symbol, next_state):
         self.state = state
         self.input_symbol = input_symbol
