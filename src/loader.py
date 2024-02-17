@@ -57,7 +57,8 @@ def load_from_regex(regex):
                 # Skip adding transition if current symbol will be modified by regex
                 if index < len(regex) - 1 and regex[index + 1] in regex_symbols:
                     continue
-
+                
+                # Create transition between states that handles new symbol
                 automaton.add_state(f"q{current_state}")
                 automaton.add_state(f"q{current_state + 1}")
                 automaton.add_transition(f"q{current_state}", symbol, f"q{current_state + 1}")
@@ -81,12 +82,14 @@ def load_from_regex(regex):
 
                 case '?':
 
-                    # Add transition from current state to next state to ensure symbol is typed at least once
+                    # Add transition from current state to new state that covers case where symbol appears
                     automaton.add_state(f"q{current_state + len(regex)}")
                     automaton.add_transition(f"q{current_state}", previousSymbol, f"q{current_state + len(regex)}")
 
+                    # Check if there is another symbol next to this expression
                     if index + 1 < len(regex) - 1:
-                        # Add transition from current state to next state to ensure symbol is typed at least once
+
+                        # Add transition from new state to the next state in order
                         automaton.add_transition(f"q{current_state + len(regex)}", regex[index + 1], f"q{current_state + 1}")
 
                 case '^':
