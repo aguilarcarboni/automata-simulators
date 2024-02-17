@@ -32,50 +32,63 @@ def load_from_regex(regex):
 
     alphabet = set()
     previousSymbol = str()
-
-    states = ['q0', 'q1', 'q2', 'q3', 'q4']
+    
     current_state = 0
 
     # DFA
     automaton = DFA()
-    for state in states:
-        automaton.add_state(state)
 
-    automaton.set_start_state(states[0])
+    automaton.add_state("q0")
+    automaton.set_start_state("q0")
 
     for index, symbol in enumerate(regex):
-        if symbol not in regex_symbols:
 
+        if symbol not in regex_symbols:
             if not symbol.isalnum():
                 print("Unrecognized symbol in regular expression.")
                 return
             
-            if symbol not in alphabet:
-                alphabet.add(symbol)
-                automaton.add_transition(states[current_state], symbol, states[current_state + 1])
-                current_state += 1
-            
             # Keep track of symbol
             previousSymbol = symbol
+            
+            if symbol not in alphabet:
+                alphabet.add(symbol)
+
+                # Skip adding transition if current symbol will be modified by regex
+                if index < len(regex) - 1 and regex[index + 1] in regex_symbols:
+                    continue
+
+                automaton.add_state(f"q{current_state}")
+                automaton.add_state(f"q{current_state + 1}")
+                automaton.add_transition(f"q{current_state}", symbol, f"q{current_state + 1}")
+                current_state += 1
 
         else:
-            #6686989*75546858
             match (symbol):
                 case '*':
-                    automaton.add_transition(states[current_state], previousSymbol, states[current_state])
-                case '+':
-                    print(current_state)
-                    # Add transition from current state to next state to ensure it is typed at least once
-                    automaton.add_transition(states[current_state], previousSymbol, states[current_state + 1])
+                    
+                    automaton.add_transition(f"q{current_state}", previousSymbol, f"q{current_state}")
 
-                    # Go to next state
+                case '+':
+
+                    # Add transition from current state to next state to ensure symbol is typed at least once
+                    automaton.add_state(f"q{current_state + 1}")
+                    automaton.add_transition(f"q{current_state}", previousSymbol, f"q{current_state + 1}")
                     current_state+=1
 
                     # Add transition to same state to ensure it can be written 1+ times
-                    automaton.add_transition(states[current_state], previousSymbol, states[current_state])
+                    automaton.add_transition(f"q{current_state}", previousSymbol, f"q{current_state}")
+
                 case '?':
-                    # Add transition to same state to ensure it can be read
-                    automaton.add_transition(states[current_state], previousSymbol, states[current_state])
+
+                    # Add transition from current state to next state to ensure symbol is typed at least once
+                    automaton.add_state(f"q{current_state + len(regex)}")
+                    automaton.add_transition(f"q{current_state}", previousSymbol, f"q{current_state + len(regex)}")
+
+                    if index + 1 < len(regex) - 1:
+                        # Add transition from current state to next state to ensure symbol is typed at least once
+                        automaton.add_transition(f"q{current_state + len(regex)}", regex[index + 1], f"q{current_state + 1}")
+
                 case '^':
                     continue
                 case '$':
@@ -85,7 +98,6 @@ def load_from_regex(regex):
                 case _:
                     print("Symbol", symbol, "not in regex dictionary")
                     return
-                
-    automaton.set_accept_states([states[current_state]])
+    automaton.set_accept_states([f"q{current_state}"])
     automaton.alphabet = alphabet
     return automaton
