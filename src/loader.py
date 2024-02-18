@@ -5,7 +5,7 @@ from automaton import DFA, NFA
 def load_from_json(json_data):
 
     # Use json to determine if machine is DFA or NFA
-    alphabet = json_data.get("alphabet", [])
+    alphabet = set(json_data.get("alphabet", []))
     automaton_type = "NFA" if "<EPSILON>" in alphabet else "DFA"
     print(f"Loading {automaton_type} from JSON...")
 
@@ -25,6 +25,7 @@ def load_from_json(json_data):
             )
     automaton.set_start_state(json_data['start_state'])
     automaton.set_accept_states(json_data['accept_states'])
+    automaton.alphabet = alphabet
     return automaton
 
 def load_from_regex(regex):

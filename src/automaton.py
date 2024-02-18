@@ -10,6 +10,36 @@ class Automaton:
         self.start_state = None
         self.accept_states = set()
 
+    def print_fa(self):
+        print("Alphabet:", self.alphabet)
+        print("States:", list(self.states.keys()))
+        print("Start State:", self.start_state)
+        print("Accept States:", list(self.accept_states))
+        print("Transitions:")
+        
+        if isinstance(self, NFA):
+            for state, state_obj in self.states.items():
+                for symbol, transitions in state_obj.transitions.items():
+                    if symbol != "epsilon_transitions":
+                        if isinstance(transitions, list):
+                            for transition in transitions:
+                                input_symbol = transition.input_symbol if transition.input_symbol != "<EPSILON>" else "epsilon"
+                                print(f"From {state} to {transition.next_state} with symbol {input_symbol}")
+                        else:
+                            input_symbol = transitions.input_symbol if transitions.input_symbol != "<EPSILON>" else "epsilon"
+                            print(f"From {state} to {transitions.next_state} with symbol {input_symbol}")
+                    else:
+                        for next_state in transitions:
+                            print(f"From {state} to {next_state} with symbol epsilon")
+        else:
+            for state, state_obj in self.states.items():
+                for symbol, next_states in state_obj.transitions.items():
+                    if isinstance(next_states, list):
+                        for next_state in next_states:
+                            print(f"From {state} to {next_state} with symbol {symbol}")
+                    else:
+                        print(f"From {state} to {next_states} with symbol {symbol}")           
+                        
     def add_state(self, name):
         if name not in self.states:
             self.states[name] = State(name)
