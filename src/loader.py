@@ -32,12 +32,11 @@ def load_from_regex(regex):
 
     alphabet = set()
     previousSymbol = str()
-    
-    current_state = 0
 
     # DFA
     automaton = DFA()
 
+    current_state = 0
     automaton.add_state("q0")
     automaton.set_start_state("q0")
 
@@ -92,15 +91,13 @@ def load_from_regex(regex):
                         # Add transition from new state to the next state in order
                         automaton.add_transition(f"q{current_state + len(regex)}", regex[index + 1], f"q{current_state + 1}")
 
-                case '^':
-                    continue
-                case '$':
-                    continue
                 case '(':
+                    if index < len(regex) - 4 and regex[index + 4] == ')':
+                        print("Lol")
                     continue
                 case _:
                     print("Symbol", symbol, "not in regex dictionary")
-                    return
+                    return None
     automaton.set_accept_states([f"q{current_state}"])
     automaton.alphabet = alphabet
     return automaton
