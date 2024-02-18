@@ -34,27 +34,33 @@ class DFA(Automaton):
         # Check symbol by symbol ensuring each is in the alphabet and has a next state
         for symbol in input_string:
             if symbol not in self.alphabet:
-                return "REJECT", f"Invalid symbol '{symbol}'"
+                if verbose:
+                    return "REJECT", f"Invalid symbol '{symbol}'", path
+                else:
+                    return "REJECT", f"Invalid symbol '{symbol}'"
 
             next_state = self.states[current_state].transitions.get(symbol)
             if next_state is None:
-                return "REJECT", f"No transition for '{symbol}' in state '{current_state}'"
+                if verbose:
+                    return "REJECT", f"No transition for '{symbol}' in state '{current_state}'", path
+                else:
+                    return "REJECT", f"No transition for '{symbol}' in state '{current_state}'"
+
 
             path.append((current_state, symbol, next_state))
             current_state = next_state
 
         # Check if current state is final state and finish process
         if current_state in self.accept_states:
-
-            ###
-            # Verbose no sirve
-            ###
             if verbose:
-                return "ACCEPT", "String accepted"
+                return "ACCEPT", "String accepted", path
             else:
                 return "ACCEPT", "String accepted"
         else:
-            return "REJECT", "String rejected"
+            if verbose:
+                return "REJECT", "String rejected", path
+            else:
+                return "REJECT", "String rejected"
 
 
 class NFA(Automaton):
@@ -87,7 +93,10 @@ class NFA(Automaton):
                 else:
                     return "ACCEPT", "String accepted"
             else:
-                return "REJECT", "String rejected"
+                if verbose:
+                    return "REJECT", "String rejected", path
+                else:
+                    return "REJECT", "String rejected"
 
         symbol = input_string[0]
         remaining_input = input_string[1:]
@@ -98,20 +107,41 @@ class NFA(Automaton):
         transitions = self.states[current_state].transitions.get("transitions", [])
         epsilon_transitions = self.states[current_state].transitions.get("epsilon_transitions", [])
 
+        final_path = []  # initialize final_path variable
+
         for transition in transitions:
-            if transition.input_symbol == symbol:
-                new_path = path + [(current_state, symbol, transition.next_state)]
-                result, message = self.process_string(remaining_input, transition.next_state, verbose, new_path)
+                if transition.input_symbol == symbol:
+                    if verbose: 
+                        new_path = path + [(current_state, symbol, transition.next_state)]
+                        result, message, final_path = self.process_string(remaining_input, transition.next_state, verbose, new_path)
+                        if result == "ACCEPT":
+                            return result, message, final_path
+                    else:
+                        new_path = path + [(current_state, symbol, transition.next_state)]
+                        result, message = self.process_string(remaining_input, transition.next_state)
+                        if result == "ACCEPT":
+                            return result, message
+
+        for next_state in epsilon_transitions:
+            if verbose:
+                if (next_state, "<EPSILON>", next_state) in path:
+                    continue  # Avoid infinite loop
+                new_path = path + [(current_state, "<EPSILON>", next_state)]
+                result, message, final_path = self.process_string(input_string, next_state, verbose, new_path)
+                if result == "ACCEPT":
+                    return result, message, final_path
+            else:
+                if (next_state, "<EPSILON>", next_state) in path:
+                    continue  # Avoid infinite loop
+                new_path = path + [(current_state, "<EPSILON>", next_state)]
+                result, message = self.process_string(input_string, next_state, verbose, new_path)
                 if result == "ACCEPT":
                     return result, message
 
-        for next_state in epsilon_transitions:
-            new_path = path + [(current_state, "<EPSILON>", next_state)]
-            result, message = self.process_string(input_string, next_state, verbose, new_path)
-            if result == "ACCEPT":
-                return result, message
-
-        return "REJECT", f"No transition for '{symbol}' in state '{current_state}'"
+        if verbose:
+            return "REJECT", f"No transition for '{symbol}' in state '{current_state}'", path
+        else:
+            return "REJECT", f"No transition for '{symbol}' in state '{current_state}'"
 
 class NFATransition:
     def __init__(self, state, input_symbol, next_state):

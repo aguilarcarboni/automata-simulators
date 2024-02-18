@@ -1,16 +1,13 @@
 {
-    "states": ["q1", "q2", "q3", "q4", "q5"],
-    "alphabet": ["a", "b", "c", "<EPSILON>"],
-    "delta": [
-    { "state": "q1", "input": "a", "next_state": "q2" },
-    { "state": "q1", "input": "a", "next_state": "q3" },
-    { "state": "q2", "input": "b", "next_state": "q4" },
-    { "state": "q2", "input": "ε", "next_state": "q4" },
-    { "state": "q3", "input": "c", "next_state": "q3" },
-    { "state": "q3", "input": "ε", "next_state": "q4" },
-    { "state": "q4", "input": "c", "next_state": "q4" },
-    { "state": "q4", "input": "d", "next_state": "q5" }
+    "states": ["q0", "q1", "q2", "q3"], "alphabet": ["0", "1"], "delta": [
+    { "state": "q0", "input": "0", "next_state": "q1" }, 
+    { "state": "q1", "input": "1", "next_state": "q3" }, 
+    { "state": "q3", "input": "0", "next_state": "q2" },
+    { "state": "q2", "input": "1", "next_state": "q0" }, 
+    { "state": "q0", "input": "1", "next_state": "q2" }, 
+    { "state": "q2", "input": "0", "next_state": "q3" }, 
+    { "state": "q3", "input": "1", "next_state": "q1" },
+    { "state": "q1", "input": "0", "next_state": "q0" }
     ],
-    "start_state": "q1",
-    "accept_states": ["q5"]
+    "start_state": "q0", "accept_states": ["q3"]
 }
