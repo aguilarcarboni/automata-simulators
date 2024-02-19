@@ -133,6 +133,7 @@ def parse_regex(regex, current_state, automaton):
 
                                  # Add transition back to state where sub-expression started
                                 automaton.add_transition(f"q{current_state}", regex[index - expression_size], f"q{current_state - expression_size + 1}")
+                                
                             case '?':
                                 continue
                             case '$':
