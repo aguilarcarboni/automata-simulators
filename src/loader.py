@@ -53,8 +53,8 @@ def parse_regex(regex, current_state, automaton):
     expression_size = 0
 
     for index, symbol in enumerate(regex):
-        expression_size += 1
         if symbol not in regex_symbols:
+            expression_size += 1
             if not symbol.isalnum():
                 print("Unrecognized symbol in regular expression.")
                 return
@@ -66,7 +66,7 @@ def parse_regex(regex, current_state, automaton):
                 alphabet.add(symbol)
 
                 # Skip adding transition if current symbol will be modified by regex
-                if index < len(regex) - 1 and regex[index + 1] in regex_symbols:
+                if index < len(regex) - 1 and regex[index + 1] in regex_symbols and (regex[index + 1] != ')' and regex[index + 1] != '('):
                     continue
                 
                 # Create transition between states that handles new symbol
@@ -108,10 +108,40 @@ def parse_regex(regex, current_state, automaton):
                 case '^':
                     continue
                 case '(':
+
+                    # Reset expression size counter
                     expression_size = 0
-                    continue
+
                 case ')':
-                    continue
+
+                    # Check if there are any characters after the sub-expression
+                    if index < len(regex) - 1:
+
+                        # Check type of regex expression
+                        match (regex[index + 1]):
+                            case '*':
+
+                                # Add transition back to state where sub-expression started
+                                automaton.add_transition(f"q{current_state}", regex[index - expression_size], f"q{current_state - expression_size + 1}")
+
+                                if index < len(regex) - 2:
+
+                                    # Add transition from initial sub-expression state to final sub-expression state
+                                    automaton.add_transition(f"q{current_state - expression_size}", regex[index + 2], f"q{current_state + 1}")
+
+                            case '+':
+
+                                 # Add transition back to state where sub-expression started
+                                automaton.add_transition(f"q{current_state}", regex[index - expression_size], f"q{current_state - expression_size + 1}")
+                            case '?':
+                                continue
+                            case '$':
+                                continue
+                            case '^':
+                                continue
+                            case _:
+                                print("Symbol", symbol, "not in regex dictionary")
+                                return None
                 case _:
                     print("Symbol", symbol, "not in regex dictionary")
                     return None
