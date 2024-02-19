@@ -74,75 +74,86 @@ def parse_regex(regex, current_state, automaton):
                 current_state += 1
 
         else:
-            match (symbol):
-                case '*':
-                    
-                    automaton.add_transition(f"q{current_state}", previousSymbol, f"q{current_state}")
+            if previousSymbol:
+                match (symbol):
+                    case '*':
+                        
+                        # Add transition loop to same state
+                        automaton.add_transition(f"q{current_state}", previousSymbol, f"q{current_state}")
 
-                case '+':
+                    case '+':
 
-                    # Add transition from current state to next state to ensure symbol is typed at least once
-                    automaton.add_state(f"q{current_state + 1}")
-                    automaton.add_transition(f"q{current_state}", previousSymbol, f"q{current_state + 1}")
-                    current_state+=1
+                        # Add transition from current state to next state to ensure symbol is typed at least once
+                        automaton.add_state(f"q{current_state + 1}")
+                        automaton.add_transition(f"q{current_state}", previousSymbol, f"q{current_state + 1}")
+                        current_state+=1
 
-                    # Add transition to same state to ensure it can be written 1+ times
-                    automaton.add_transition(f"q{current_state}", previousSymbol, f"q{current_state}")
+                        # Add transition to same state to ensure it can be written 1+ times
+                        automaton.add_transition(f"q{current_state}", previousSymbol, f"q{current_state}")
 
-                case '?':
+                    case '?':
 
-                    # Add transition from current state to new state that covers case where symbol appears
-                    automaton.add_state(f"q{current_state + len(regex)}")
-                    automaton.add_transition(f"q{current_state}", previousSymbol, f"q{current_state + len(regex)}")
+                        # Add transition from current state to new state that covers case where symbol appears
+                        automaton.add_state(f"q{current_state + len(regex)}")
+                        automaton.add_transition(f"q{current_state}", previousSymbol, f"q{current_state + len(regex)}")
 
-                    # Check if there is another symbol next to this expression
-                    if index + 1 < len(regex) - 1:
+                        # Check if there is another symbol next to this expression
+                        if index + 1 < len(regex) - 1:
 
-                        # Add transition from new state to the next state in order
-                        automaton.add_transition(f"q{current_state + len(regex)}", regex[index + 1], f"q{current_state + 1}")
+                            # Add transition from new state to the next state in order
+                            automaton.add_transition(f"q{current_state + len(regex)}", regex[index + 1], f"q{current_state + 1}")
 
-                case '$':
-                    continue
-                case '^':
-                    continue
-                case '(':
+                    case '$':
+                        continue
+                    case '^':
+                        continue
+                    case '(':
 
-                    # Reset expression size counter
-                    expression_size = 0
+                        # Reset expression size counter
+                        expression_size = 0
 
-                case ')':
+                    case ')':
+                        previousSymbol = None
 
-                    # Check if there are any characters after the sub-expression
-                    if index < len(regex) - 1:
+                        # Check if there are any characters after the sub-expression
+                        if index < len(regex) - 1:
 
-                        # Check type of regex expression
-                        match (regex[index + 1]):
-                            case '*':
+                            # Check type of regex expression
+                            match (regex[index + 1]):
+                                case '*':
 
-                                # Add transition back to state where sub-expression started
-                                automaton.add_transition(f"q{current_state}", regex[index - expression_size], f"q{current_state - expression_size + 1}")
+                                    # Add transition back to state where sub-expression started
+                                    automaton.add_transition(f"q{current_state}", regex[index - expression_size], f"q{current_state - expression_size + 1}")
 
-                                if index < len(regex) - 2:
+                                    if index < len(regex) - 2:
 
-                                    # Add transition from initial sub-expression state to final sub-expression state
-                                    automaton.add_transition(f"q{current_state - expression_size}", regex[index + 2], f"q{current_state + 1}")
+                                        # Add transition from initial sub-expression state to final sub-expression state
+                                        automaton.add_transition(f"q{current_state - expression_size}", regex[index + 2], f"q{current_state + 1}")
 
-                            case '+':
+                                case '+':
 
-                                 # Add transition back to state where sub-expression started
-                                automaton.add_transition(f"q{current_state}", regex[index - expression_size], f"q{current_state - expression_size + 1}")
+                                    # Add transition back to state where sub-expression started
+                                    automaton.add_transition(f"q{current_state}", regex[index - expression_size], f"q{current_state - expression_size + 1}")
 
-                            case '?':
-                                continue
-                            case '$':
-                                continue
-                            case '^':
-                                continue
-                            case _:
-                                print("Symbol", symbol, "not in regex dictionary")
-                                return None
-                case _:
-                    print("Symbol", symbol, "not in regex dictionary")
-                    return None
+                                case '?':
+
+                                    # If there is a symbol after the sub-expresion
+                                    if index < len(regex) - 2:
+
+                                        # Add transition from initial state to final state
+                                        automaton.add_transition(f"q{current_state - expression_size}", regex[index + 2], f"q{current_state + 1}")
+                                    else:
+                                        #automaton.add_transition(f"q{current_state - expression_size - 1}", regex[index - expression_size - 2], f"q{current_state}")
+                                        continue
+                                case '$':
+                                    continue
+                                case '^':
+                                    continue
+                                case _:
+                                    print("Symbol", symbol, "not in regex dictionary")
+                                    return None
+                    case _:
+                        print("Symbol", symbol, "not in regex dictionary")
+                        return None
             
     return current_state, automaton
