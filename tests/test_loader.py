@@ -160,4 +160,4 @@ def test_load_from_regex():
     '''
 
 if __name__ == "__main__":
-    pytest.main()
+    pytest.main() 
