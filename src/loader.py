@@ -29,11 +29,6 @@ def load_from_json(json_data):
     return automaton
 
 def load_from_regex(regex):
-    regex_symbols = ['*', '+', '?', '^', '$', '(',')']
-
-    alphabet = set()
-    previousSymbol = str()
-
     # DFA
     automaton = DFA()
 
@@ -41,8 +36,23 @@ def load_from_regex(regex):
     automaton.add_state("q0")
     automaton.set_start_state("q0")
 
-    for index, symbol in enumerate(regex):
+    current_state, automaton = parse_regex(regex, current_state, automaton)
+    
+    automaton.set_accept_states([f"q{current_state}"])
+    return automaton
 
+
+def parse_regex(regex, current_state, automaton):
+
+    regex_symbols = ['*', '+', '?', '^', '$', '(',')']
+
+    alphabet = set()
+    previousSymbol = str()
+
+    expression_size = 0
+
+    for index, symbol in enumerate(regex):
+        expression_size += 1
         if symbol not in regex_symbols:
             if not symbol.isalnum():
                 print("Unrecognized symbol in regular expression.")
@@ -92,13 +102,16 @@ def load_from_regex(regex):
                         # Add transition from new state to the next state in order
                         automaton.add_transition(f"q{current_state + len(regex)}", regex[index + 1], f"q{current_state + 1}")
 
+                case '$':
+                    continue
+                case '^':
+                    continue
                 case '(':
-                    if index < len(regex) - 4 and regex[index + 4] == ')':
-                        print("Lol")
+                    expression_size = 0
+                    continue
+                case ')':
                     continue
                 case _:
                     print("Symbol", symbol, "not in regex dictionary")
                     return None
-    automaton.set_accept_states([f"q{current_state}"])
-    automaton.alphabet = alphabet
-    return automaton
+    return current_state, automaton
