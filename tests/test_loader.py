@@ -2,11 +2,9 @@
 import os
 import sys
 
-# Agrega el directorio src al PYTHONPATH
 src_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src'))
 sys.path.insert(0, src_dir)
 
-# test_loader.py
 import pytest
 from loader import load_from_json, load_from_regex
 from automaton import DFA, NFA
@@ -89,7 +87,7 @@ def test_load_from_json_NFA_failure():
     assert automaton.accept_states == {"q2"}
     assert automaton.process_string("10ε", "q0") == ("REJECT", "No transition for '1' in state 'q0'")
 
-def test_load_from_regex():
+def test_load_from_regex_():
     regex = "a*"
     automaton = load_from_regex(regex)
     assert isinstance(automaton, DFA)

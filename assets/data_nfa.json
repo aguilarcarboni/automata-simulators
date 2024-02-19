@@ -1,0 +1,7 @@
+{
+    "states": ["q0", "q1"], "alphabet": ["a", "<EPSILON>"], "delta": [
+    { "state": "q0", "input": "a", "next_state": "q1" }, 
+    { "state": "q1", "input": "ε", "next_state": "q1" }
+    ],
+    "start_state": "q0", "accept_states": ["q1"]
+}

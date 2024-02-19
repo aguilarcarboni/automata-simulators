@@ -110,6 +110,8 @@ class NFA(Automaton):
             if "transitions" not in self.states[current_state].transitions:
                 self.states[current_state].transitions["transitions"] = []
             self.states[current_state].transitions["transitions"].append(transition)
+        
+        self.alphabet.add(input_symbol)
 
     def process_string(self, input_string, current_state, verbose=False, path=None):
         # Track the path for verbose mode
