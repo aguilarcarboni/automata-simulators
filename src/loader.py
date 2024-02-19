@@ -29,6 +29,7 @@ def load_from_json(json_data):
     return automaton
 
 def load_from_regex(regex):
+
     # DFA
     automaton = DFA()
 
@@ -114,4 +115,5 @@ def parse_regex(regex, current_state, automaton):
                 case _:
                     print("Symbol", symbol, "not in regex dictionary")
                     return None
+            
     return current_state, automaton
