@@ -104,8 +104,10 @@ def parse_regex(regex, current_state, automaton):
                             automaton.add_transition(f"q{current_state + len(regex)}", regex[index + 1], f"q{current_state + 1}")
 
                     case '$':
+
                         automaton.add_transition(f"q{current_state}", regex[index - 1], f"q{current_state + 1}")
                         current_state += 1
+                        
                     case '^':
                         continue
                     case '(':
