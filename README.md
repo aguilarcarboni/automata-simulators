@@ -1,4 +1,4 @@
-# DFA and NFA Simulator
+# Automata Simulators
 
 ## CS2343 - Theory of Automata
 
