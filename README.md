@@ -1,6 +1,6 @@
 # Automata Simulators
 
-## CS2343 - Theory of Automata - Project 1
+## Theory of Automata
 
 ### Description
 
